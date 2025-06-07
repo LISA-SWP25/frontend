@@ -2,10 +2,9 @@
   <v-main>
     <router-view />
   </v-main>
-
-  <AppFooter />
+  <Footer />
 </template>
 
 <script setup>
-  //
+  
 </script>

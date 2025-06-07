@@ -1,5 +1,6 @@
 <template>
-  <HelloWorld />
+  <Header />
+  <ControlPanel />
 </template>
 
 <script setup>
