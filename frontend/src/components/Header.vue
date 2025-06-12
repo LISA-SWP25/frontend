@@ -1,27 +1,20 @@
 <template>
   <v-app-bar>
-    <v-app-bar-nav-icon @click="$emit('toggle-drawer')" />
-
+    <img :style="{ marginLeft:'1%'}" height="100%" src="/fox.png"/>
     <v-toolbar-title>LISA</v-toolbar-title>
-
+    <v-btn to="/agents" text="lol">agents</v-btn>
     <v-spacer />
 
-    <v-menu>
-      <template #activator="{ props }">
-        <v-btn icon v-bind="props" color="white"/>
-      </template>
-
-      <v-list>
-        <v-list-item title="Профиль" />
-        <v-list-item title="Выход" @click="logout" />
-      </v-list>
-    </v-menu>
+   <v-btn @click="toggleTheme">Сменить тему</v-btn>
   </v-app-bar>
 </template>
 
-<script setup lang="ts">
-const logout = () => {
-  console.log('Logging out...')
-  // вызвать store или router.push('/login')
+<script setup>
+import { useTheme } from 'vuetify'
+
+const theme = useTheme()
+
+function toggleTheme() {
+  theme.global.name.value = theme.global.name.value === 'dark' ? 'light' : 'dark'
 }
 </script>

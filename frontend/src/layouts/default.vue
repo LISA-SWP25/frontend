@@ -1,8 +1,9 @@
 <template>
   <v-main>
+    <Header />
     <router-view />
+    <Footer />
   </v-main>
-  <Footer />
 </template>
 
 <script setup>
