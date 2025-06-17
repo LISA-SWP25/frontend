@@ -30,7 +30,7 @@
         <v-container v-if="modelTemplate === 'Create role'">
             <v-row>
                 <v-col class="overflow-y-auto" style="max-height: 400px;">
-                    <v-text-field v-for="app in apps">
+                    <v-text-field v-for="app in apps" label="app">
                         <template #append-inner>
                             <v-icon @click="clearText" class="cursor-pointer" color="grey">
                                 mdi-close
@@ -41,7 +41,7 @@
                     
                 </v-col>
                 <v-col class="overflow-y-auto" style="max-height: 400px;">
-                    <v-text-field v-for="page in pages">
+                    <v-text-field v-for="page in pages" label="URL">
                         <template #append-inner>
                             <v-icon @click="deleteApp" class="cursor-pointer" color="grey">
                                 mdi-close
