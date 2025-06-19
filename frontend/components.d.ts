@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AgentTextField: typeof import('./src/components/agentTextField.vue')['default']
     ControlPanel: typeof import('./src/components/ControlPanel.vue')['default']
     Cringe1: typeof import('./src/components/cringe1.vue')['default']
     Footer: typeof import('./src/components/Footer.vue')['default']

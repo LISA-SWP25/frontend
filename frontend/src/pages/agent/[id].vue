@@ -1,6 +1,5 @@
 <template>
-    <div >name: {{ agentInformation.name }} </div>
-    <div>id: {{ agentInformation.id }} </div>
+    дописать
 </template>
 <script setup>
 

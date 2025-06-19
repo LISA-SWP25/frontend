@@ -3,9 +3,6 @@
         <v-table>
             <thead>
                 <tr>
-                <v-btn to="/addAgent" text="lol">add agent</v-btn>
-                </tr>
-                <tr>
                     <th>
                         agent
                     </th>
