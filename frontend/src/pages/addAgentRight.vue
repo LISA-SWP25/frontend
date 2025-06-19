@@ -1,5 +1,6 @@
 <template>
 <v-stepper alt-labels :items=steps height="100%">
+
   <template v-slot:item.1>
     <v-card title="name & IP" flat>
         <v-text-field v-model="data.name" label="name" required/>
@@ -20,29 +21,39 @@
 
   <template v-slot:item.3>
     <v-card title="settings" flat>
-            <v-row>
-                <v-col class="overflow-y-auto" style="max-height: 400px;">
-                    <v-text-field v-for="(app, index) in data.apps" :key="index" v-model="data.apps[index]" label="App" append-icon="mdi-close" @click:append="remove(app, data.apps)"/>
-                    <v-btn @click="add(data.apps)">Add App</v-btn>
-                </v-col>
-                <v-col class="overflow-y-auto" style="max-height: 400px;">
-                    <v-text-field v-for="(page, index) in data.pages" :key="index" v-model="data.pages[index]" label="URL" append-icon="mdi-close" @click:append="remove(page, data.pages)"/>
-                    <v-btn @click="add(data.pages)">Add page</v-btn>
-                </v-col>
-                <v-col class="overflow-y-auto" style="max-height: 400px;">
-                    <v-text-field v-for="(brake, index) in data.breaks" :key="index" v-model="data.breaks[index]" label="break" append-icon="mdi-close" @click:append="remove(brake, data.breaks)"/>
-                    <v-btn @click="add(data.breaks)">Add brake</v-btn>
-                </v-col>
-            </v-row>
-            <v-btn @click="submit">send</v-btn>
+      <v-row>
+        <v-col class="overflow-y-auto" style="max-height: 400px;">
+          <v-card title="Apps" flat>
+            <v-text-field v-for="(app, index) in data.apps" :key="index" v-model="data.apps[index]" label="App" append-icon="mdi-close" @click:append="remove(app, data.apps)"/>
+          </v-card>
+          <v-btn @click="add(data.apps)" icon="mdi-plus" flat/>
+        </v-col>
+        <v-col class="overflow-y-auto" style="max-height: 400px;">
+          <v-card title="Pages" flat>
+            <v-text-field v-for="(page, index) in data.pages" :key="index" v-model="data.pages[index]" label="URL" append-icon="mdi-close" @click:append="remove(page, data.pages)"/>
+          </v-card>
+          <v-btn @click="add(data.pages)" icon="mdi-plus" flat/>
+        </v-col>
+        <v-col class="overflow-y-auto" style="max-height: 400px;">
+          <v-card title="Breaks" flat>
+            <v-text-field v-for="(brake, index) in data.breaks" :key="index" v-model="data.breaks[index]" label="break" append-icon="mdi-close" @click:append="remove(brake, data.breaks)"/>
+          </v-card>
+          <v-btn @click="add(data.breaks)" icon="mdi-plus" flat/>
+        </v-col>
+      </v-row>
     </v-card>
   </template>
+
   <template v-slot:item.4>
     check everything...
     <v-btn @click="submit">send</v-btn>
   </template>
+
 </v-stepper>
+
 </template>
+
+
 
 <script setup>
 
@@ -69,7 +80,7 @@ const IP = ref('')
 
 
 
-function submit() {
+  function submit() {
   const jsonData = JSON.stringify(data.value)
   const jsonIP = JSON.stringify(IP.value)
   console.log(jsonData)
