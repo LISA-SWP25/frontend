@@ -31,6 +31,7 @@
 
     function agentInfo(id) {
         router.push(`/agent/${id}`);
+        
     }
 </script>
 <style></style>

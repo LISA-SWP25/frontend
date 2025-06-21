@@ -1,5 +1,5 @@
-<template>
-<v-stepper alt-labels :items=steps height="100%">
+<template> 
+<v-stepper alt-labels :items=steps>
 
   <template v-slot:item.1>
     <v-card title="name & IP" flat>
@@ -45,17 +45,26 @@
   </template>
 
   <template v-slot:item.4>
-    check everything...
+    <v-label>agent information</v-label>
+    <v-card flat class="d-flex">
+      <v-list :items="data.apps">
+        
+      </v-list>
+      <v-list :items="data.pages"></v-list>
+    </v-card>
+    <div class="d-flex justify-center align-end">
     <v-btn @click="submit">send</v-btn>
+    </div>
   </template>
 
 </v-stepper>
-
 </template>
 
 
 
 <script setup>
+import { da } from 'vuetify/locale';
+
 
 const steps = ['name & IP', 'OS', 'behavior', 'submit'];
 
@@ -92,8 +101,8 @@ const IP = ref('')
     body: jsonData
   })
   .then(res => res.json())
-  .then(data => console.log('Ответ сервера:', data))
-  .catch(err => console.error('Ошибка отправки:', err))
+  //.then(data => console.log('Ответ сервера:', data))
+  // .catch(err => console.error('Ошибка отправки:', err))
 
 
 //  посылка IP
@@ -103,8 +112,8 @@ const IP = ref('')
     body: jsonIP
   })
   .then(res => res.json())
-  .then(data => console.log('Ответ сервера:', data))
-  .catch(err => console.error('Ошибка отправки:', err))
+  //.then(data => console.log('Ответ сервера:', data))
+  // .catch(err => console.error('Ошибка отправки:', err))
 
 }
 

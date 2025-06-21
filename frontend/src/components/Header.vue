@@ -4,7 +4,7 @@
     <v-toolbar-title>LISA</v-toolbar-title>
     <v-btn to="/" text="about" />
     <v-btn to="/agents" text="agents" />
-    <v-btn to="addAgentRight" text="add agent" />
+    <v-btn to="/addAgentRight" text="add agent" />
     <v-spacer />
 
    <v-btn @click="toggleTheme">Сменить тему</v-btn>
@@ -12,7 +12,9 @@
 </template>
 
 <script setup>
-import { useTheme } from 'vuetify'
+import { globalTheme } from '@/stores/app';
+import { useTheme } from 'vuetify';
+
 
 const theme = useTheme()
 
