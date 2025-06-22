@@ -25,8 +25,10 @@
     const allAgents = ref([]);
     const router = useRouter();
     onMounted(async () => {
-        const res = await fetch('https://testapi.jasonwatmore.com/products');
+        const res = await fetch("http://localhost:3000/api/agents")
         allAgents.value = await res.json();
+        console.log(allAgents);
+        
     });
 
     function agentInfo(id) {
