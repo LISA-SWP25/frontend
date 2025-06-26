@@ -10,12 +10,15 @@
 
   <template v-slot:item.2>
     <v-card title="OS" flat>
-        <v-btn>
-            <v-img src="/win.png" width="30" height="30" cover />
+      <v-container class="d-flex justify-center"> 
+        <v-btn @click="addOS('windows')">
+            <v-img src="/win.png" width="30" height="30" />
         </v-btn>
+        <v-spacer/>
         <v-btn>
-            <v-img src="/win.png" width="30" height="30" cover />линукс на самом деле
+            <v-img src="/Linux.png" width="30" height="30" cover />
         </v-btn>
+      </v-container>  
     </v-card>
   </template>
 
@@ -46,11 +49,11 @@
 
   <template v-slot:item.4>
     <v-label>agent information</v-label>
+
     <v-card flat class="d-flex">
-      <v-list :items="data.apps">
-        
-      </v-list>
-      <v-list :items="data.pages"></v-list>
+      <v-list :items="data.apps" />    
+      <v-list :items="data.pages" />
+      <v-list :items="data.breaks" />
     </v-card>
     <div class="d-flex justify-center align-end">
     <v-btn @click="submit">send</v-btn>
@@ -63,14 +66,12 @@
 
 
 <script setup>
-import { da } from 'vuetify/locale';
-
 
 const steps = ['name & IP', 'OS', 'behavior', 'submit'];
 
 const data = ref({
     name: '',
-    os: '',
+    os: 'windows',
     apps: [],
     pages: [],
     breaks: [],
@@ -87,6 +88,10 @@ const IP = ref('')
     container.pop(item);
   }
 
+  function addOS(os) {
+    data.os = os;
+  }
+
 
 
   function submit() {
@@ -95,7 +100,7 @@ const IP = ref('')
   console.log(jsonData)
 
  //посылка всей инфы на агент
-  fetch('/agents/api', {
+  fetch('backend/api/endpoints/agents', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: jsonData
@@ -106,7 +111,7 @@ const IP = ref('')
 
 
 //  посылка IP
-  fetch('/wrapper/api', {
+  fetch('backend/api/endpoints/wrapper', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: jsonIP
