@@ -7,12 +7,12 @@
                         agent
                     </th>
                     <th>
-                       status
+                       ID
                     </th>
                 </tr>
             </thead>
             <tbody> 
-                <tr v-if="sortType='id'" v-for="agent in allAgents" :key="agent.id" @click="agentInfo(agent.id)">
+                <tr v-for="agent in allAgents" :key="agent.id" @click="agentInfo(agent.agent_id)">
                     <td>{{ agent.name }}</td>
                     <td> {{ agent.id }}</td>
                 </tr>
@@ -21,11 +21,10 @@
     </v-card>
 </template>
 <script setup>
-    const sortType = 'id';
     const allAgents = ref([]);
     const router = useRouter();
     onMounted(async () => {
-        const res = await fetch("https://testapi.jasonwatmore.com/products")
+        const res = await fetch("http://localhost:8000/api/agents?skip=0&limit=100")
         allAgents.value = await res.json();
         console.log(allAgents);
         

@@ -21,7 +21,7 @@ declare module 'vue-router/auto-routes' {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
     '/addAgent': RouteRecordInfo<'/addAgent', '/addAgent', Record<never, never>, Record<never, never>>,
     '/addAgentRight': RouteRecordInfo<'/addAgentRight', '/addAgentRight', Record<never, never>, Record<never, never>>,
-    '/agent/[id]': RouteRecordInfo<'/agent/[id]', '/agent/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    '/agent/[agent_id]': RouteRecordInfo<'/agent/[agent_id]', '/agent/:agent_id', { agent_id: ParamValue<true> }, { agent_id: ParamValue<false> }>,
     '/agents': RouteRecordInfo<'/agents', '/agents', Record<never, never>, Record<never, never>>,
   }
 }
