@@ -2,7 +2,7 @@
 <v-stepper v-model="step" :items=steps alt-labels hide-actions>
 
 <v-stepper-actions
-      @click:next="validate()"
+      @click:next="stepper()"
       @click:prev="step--"
 ></v-stepper-actions>
 
@@ -64,7 +64,7 @@
           <v-card title="Breaks" flat>
             <div v-for="(breakItem, index) in agentTemplate.template_data.schedule.breaks" :key="index" class="mb-4 pa-4">
               <v-text-field v-model="breakItem.start" label="Start"/>
-              <v-text-field v-model="breakItem.duration_minutes" label="Duration"/>
+              <v-text-field v-model="breakItem.duration" label="Duration"/>
             </div>
           </v-card>
           <v-btn @click="addBreak()" icon="mdi-plus" flat/>
@@ -112,17 +112,15 @@
 
 <script setup>
 import axios from 'axios'
+import { ca } from 'vuetify/locale';
 
 const router = useRouter();
 
-const currentStep = ref('')
 const categories = ['developer', 'admin', 'user', 'analyst', 'security']
 const roles = ref([])
 const templates = ref([])
 const steps = ['role', 'OS', 'behavior', 'submit'];
-const IP = ref('')
 const step = ref('')
-const presets = ref('')
 
 const selected = ref(null)
 const selectedTemplate = ref(null)
@@ -136,6 +134,7 @@ const agentRole = ref({
 const agentTemplate = ref({
   name: "",
   role_id: null,
+  description: "",
   os_type: "",
   template_data: {
     activities: [{
@@ -175,6 +174,10 @@ const agentConfig = ref({
       agentRole.value.name = callback.name
       agentRole.value.category = callback.category
       agentRole.value.description = callback.description
+
+      agentTemplate.value.name = callback.name
+      agentTemplate.value.description = callback.description
+      agentTemplate.value.role_id = callback.id
 
       agentConfig.value.name = callback.name
       agentConfig.value.role_id = callback.id
@@ -222,10 +225,15 @@ const agentConfig = ref({
   }
 
   function addOS(os) {
-    agentConfig.value.os_type = os;
+    agentTemplate.value.os_type = os
+    agentConfig.value.os_type = os
   }
 
 
+  async function stepper() {
+    const result = await validate()
+    if (result) step.value++
+  }
 
   // validation at each step
   async function validate() {
@@ -235,10 +243,13 @@ const agentConfig = ref({
         if (agentConfig.value.role_id == null) {
         console.log('no template selected. Validation...')
         try {
+          console.log(agentRole.value)
           const response = await axios.post('http://localhost:8000/api/roles', agentRole.value)
-          if (response.data.ok) {
+          if (response.data.id != null) {
+            agentTemplate.value.role_id = response.data.id
+            agentConfig.value.role_id = response.data.id
+            console.log("Template ID:", agentConfig.value.role_id)
             console.log('success!')
-            step.value++
             return true
           } else {
             console.error('Ошибка в ответе:', response.data)
@@ -251,20 +262,23 @@ const agentConfig = ref({
           return false
           }
         }
-        step.value++
+        console.log("Template ID:", agentConfig.value.role_id)
+        return true
       case 2:
         if (agentConfig.value.os_type == null) {
           console.error("ERROR : null OS")
           return false
         }
+        console.log('OS:', agentTemplate.value.os_type)
+        return true
       case 3:
         if (agentConfig.value.template_id == null) {
-        console.log('role validation...')
+        console.log('no template selected. Validation...')
         try {
-          const response = await axios.post('http://localhost:8000/api/te', agentRole.value)
+          console.log(agentTemplate.value)
+          const response = await axios.post('http://localhost:8000/api/behavior-templates', agentRole.value)
           if (response.data.ok) {
             console.log('success!')
-            step.value++
             return true
           } else {
             console.error('Ошибка в ответе:', response.data)
@@ -277,7 +291,7 @@ const agentConfig = ref({
           return false
           }
         }
-        step++ 
+        return true
     }
   }
   
