@@ -1,5 +1,12 @@
 <template> 
-<v-stepper alt-labels :items=steps>
+<v-stepper v-model="step" :items=steps alt-labels hide-actions>
+
+<v-stepper-actions
+      @click:next="validate()"
+      @click:prev="step--"
+></v-stepper-actions>
+
+
 <!-- name & ip -->
 
   <template v-slot:item.1>
@@ -41,16 +48,16 @@
             :key="index" v-model="agentTemplate.template_data.activities[0].apps[index]" label="App" 
             append-icon="mdi-close" @click:append="remove(app, agentTemplate.template_data.activities[0].apps)"/>
           </v-card>
-          <v-btn @click="add(agentTemplate.template_data.activities.apps)" icon="mdi-plus" flat/>
+          <v-btn @click="add(agentTemplate.template_data.activities[0].apps)" icon="mdi-plus" flat/>
         </v-col>
 
         <v-col class="overflow-y-auto" style="max-height: 400px;">
           <v-card title="Pages" flat>
             <v-text-field v-for="(app, index) in agentTemplate.template_data.activities[0].pages"
-            :key="index" v-model="agentTemplate.template_data.activities[0].pages[index]" label="App" 
+            :key="index" v-model="agentTemplate.template_data.activities[0].pages[index]" label="page" 
             append-icon="mdi-close" @click:append="remove(app, agentTemplate.template_data.activities[0].pages)"/>
           </v-card>
-          <v-btn @click="add(agentTemplate.template_data.activities.pages)" icon="mdi-plus" flat/>
+          <v-btn @click="add(agentTemplate.template_data.activities[0].pages)" icon="mdi-plus" flat/>
         </v-col>
 
         <v-col class="overflow-y-auto" style="max-height: 400px;">
@@ -104,13 +111,17 @@
 
 
 <script setup>
+import axios from 'axios'
+
 const router = useRouter();
 
+const currentStep = ref('')
 const categories = ['developer', 'admin', 'user', 'analyst', 'security']
 const roles = ref([])
 const templates = ref([])
 const steps = ['role', 'OS', 'behavior', 'submit'];
 const IP = ref('')
+const step = ref('')
 const presets = ref('')
 
 const selected = ref(null)
@@ -170,6 +181,8 @@ const agentConfig = ref({
     }
   })
 
+
+  //probably activities[0] will be needed to rewrite. Ask Danila abt it
   watch(selectedTemplate, (callback) => {
   if (callback) {
     agentTemplate.value.template_data.activities[0].apps = [...callback.template_data.activities[0].apps]
@@ -184,6 +197,14 @@ const agentConfig = ref({
   const selectedRole = selected.value
   if (selectedRole && ( callback.name !== selectedRole.name || callback.category !== selectedRole.category || callback.description !== selectedRole.description )) {
     selected.value = null
+    agentConfig.value.role_id = null
+  }
+}, { deep: true })
+
+  watch(agentTemplate, (callback) => {
+  const fields = selectedTemplate.value
+  if (fields && ( callback.template_data !== fields.template_data)) {
+    selectedTemplate.value = null
   }
 }, { deep: true })
 
@@ -193,7 +214,7 @@ const agentConfig = ref({
   }
 
   function addBreak() {
-    data.value.breaks.push({ start: '', duration: '' })
+    agentTemplate.value.template_data.schedule.breaks.push({ start: '', duration: '' })
   }
 
   function remove(item, container) {
@@ -203,33 +224,63 @@ const agentConfig = ref({
   function addOS(os) {
     agentConfig.value.os_type = os;
   }
-  
- //создание роли
-async function submitAndContinue() {
-  if (selected === null) {
-    try {
-      const response = await fetch('http://localhost:8000/api/roles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: jsonData,
-      })
 
-      if (response.ok) {
-        const result = await response.json()
-        console.log('role created', result)  
-      } else {
-        const errorText = await response.text()
-        console.error('Ошибка ответа сервера:', response.status, errorText)
-      }
-    } catch (err) {
-      console.error('Ошибка отправки запроса:', err)
+
+
+  // validation at each step
+  async function validate() {
+    console.log(step.value)
+    switch (step.value) {
+      case 1:
+        if (agentConfig.value.role_id == null) {
+        console.log('no template selected. Validation...')
+        try {
+          const response = await axios.post('http://localhost:8000/api/roles', agentRole.value)
+          if (response.data.ok) {
+            console.log('success!')
+            step.value++
+            return true
+          } else {
+            console.error('Ошибка в ответе:', response.data)
+            return false
+          }
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            console.error(error)
+          }   
+          return false
+          }
+        }
+        step.value++
+      case 2:
+        if (agentConfig.value.os_type == null) {
+          console.error("ERROR : null OS")
+          return false
+        }
+      case 3:
+        if (agentConfig.value.template_id == null) {
+        console.log('role validation...')
+        try {
+          const response = await axios.post('http://localhost:8000/api/te', agentRole.value)
+          if (response.data.ok) {
+            console.log('success!')
+            step.value++
+            return true
+          } else {
+            console.error('Ошибка в ответе:', response.data)
+            return false
+          }
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            console.error(error)
+          }   
+          return false
+          }
+        }
+        step++ 
     }
-  } else {
-  //  step.value++
   }
-}
-
-
+  
   async function submit() {
   const agentJson = JSON.stringify(agentConfig.value)
   console.log(agentJson)
