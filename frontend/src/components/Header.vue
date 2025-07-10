@@ -5,6 +5,7 @@
     <v-btn to="/" text="about" />
     <v-btn to="/agents" text="agents" />
     <v-btn to="/addAgentRight" text="add agent" />
+    <v-btn to="/manageTemplates" text="templates" />
     <v-spacer />
 
    <v-btn @click="toggleTheme">Сменить тему</v-btn>
