@@ -1,4 +1,5 @@
 <template> 
+
 <v-stepper v-model="step" :items=steps alt-labels hide-actions>
 
 <v-stepper-actions
@@ -44,27 +45,22 @@
 
         <v-col class="overflow-y-auto" style="max-height: 400px;">
           <v-card title="Apps" flat>
-            <v-text-field v-for="(app, index) in agentTemplate.template_data.activities[0].apps"
-            :key="index" v-model="agentTemplate.template_data.activities[0].apps[index]" label="App" 
-            append-icon="mdi-close" @click:append="remove(app, agentTemplate.template_data.activities[0].apps)"/>
+            <v-text-field v-for="(app, index) in agentTemplate.template_data.applications_used"
+            :key="index" v-model="agentTemplate.template_data.applications_used[index]" label="App" 
+            append-icon="mdi-close" @click:append="remove(index, agentTemplate.template_data.applications_used)"/>
           </v-card>
-          <v-btn @click="add(agentTemplate.template_data.activities[0].apps)" icon="mdi-plus" flat/>
-        </v-col>
-
-        <v-col class="overflow-y-auto" style="max-height: 400px;">
-          <v-card title="Pages" flat>
-            <v-text-field v-for="(app, index) in agentTemplate.template_data.activities[0].pages"
-            :key="index" v-model="agentTemplate.template_data.activities[0].pages[index]" label="page" 
-            append-icon="mdi-close" @click:append="remove(app, agentTemplate.template_data.activities[0].pages)"/>
-          </v-card>
-          <v-btn @click="add(agentTemplate.template_data.activities[0].pages)" icon="mdi-plus" flat/>
+          <v-btn @click="add(agentTemplate.template_data.applications_used)" icon="mdi-plus" flat/>
         </v-col>
 
         <v-col class="overflow-y-auto" style="max-height: 400px;">
           <v-card title="Breaks" flat>
-            <div v-for="(breakItem, index) in agentTemplate.template_data.schedule.breaks" :key="index" class="mb-4 pa-4">
-              <v-text-field v-model="breakItem.start" label="Start"/>
-              <v-text-field v-model="breakItem.duration" label="Duration"/>
+            <div class="mb-4 pa-4">
+              <div v-for="(breakItem, index) in agentTemplate.template_data.work_schedule.breaks" :key="index">
+                <v-text-field v-model="breakItem.start" label="Start" hint="HH:MM"/>
+                <v-text-field v-model.number="breakItem.duration_minutes" label="Duration (in minutes)"/>
+              </div>
+              <v-text-field v-model="agentTemplate.template_data.work_schedule.start_time" label="begin work" hint="HH:MM" />
+              <v-text-field v-model="agentTemplate.template_data.work_schedule.end_time" label="end work" hint="HH:MM" />
             </div>
           </v-card>
           <v-btn @click="addBreak()" icon="mdi-plus" flat/>
@@ -78,28 +74,14 @@
   <template v-slot:item.4>
     <v-label>agent information</v-label>
 
-    <v-card flat class="d-flex">
+    <v-card flat >
+      сделать АДЕКВАТНЫЙ список с информацией
       <div>
-        apps
-      <v-list :items="agentTemplate.template_data.activities[0].apps" />    
+        <v-text-field v-model="agentConfig.injection_target" label="injection target" />
+        <v-select v-model="agentConfig.stealth_level" label="stealth level" :items="stealthLevels" />
       </div>
-      <v-spacer/>
-      <div>
-        pages
-      <v-list :items="agentTemplate.template_data.activities[0].pages" />
-      </div>
-      <v-spacer/>
-      <div>
-        breaks
-        <div v-for="(breakItem, index) in agentTemplate.template_data.schedule.breaks" :key="index" class="mb-4 pa-4">
-          <div>start: {{ breakItem.start }} </div>
-          <div>duration: {{ breakItem.duration_minutes }} </div>
-        </div>
-      </div>
-      
     </v-card>
-    <div>name :{{ agentRole.name }}</div>
-    <div>category :{{ agentRole.category }}</div>
+    
     <div class="d-flex justify-center align-end">
     <v-btn @click="submit">send</v-btn>
     </div>
@@ -111,12 +93,15 @@
 
 
 <script setup>
+import Loader from '@/components/Loader.vue';
 import axios from 'axios'
-import { ca } from 'vuetify/locale';
 
 const router = useRouter();
 
+const isLoading = ref(false)
+
 const categories = ['developer', 'admin', 'user', 'analyst', 'security']
+const stealthLevels = ['low', 'medium', 'high']
 const roles = ref([])
 const templates = ref([])
 const steps = ['role', 'OS', 'behavior', 'submit'];
@@ -131,33 +116,40 @@ const agentRole = ref({
   category: ""
 })
 
+
+//used to POST behavior-templates
 const agentTemplate = ref({
   name: "",
-  role_id: null,
   description: "",
-  os_type: "",
+  role_id: null,
   template_data: {
-    activities: [{
-      apps: [],
-      pages: [],
-    }],
-    schedule: {
-      breaks: []
+    activity_pattern: "",
+    applications_used: [],
+    productivity_metrics: {
+      average_session_length: "",
+      break_frequency: "",
+      code_sessions_per_day: ""
     },
-    stealth_config: {}
+    work_schedule: {
+      breaks: [],
+      end_time: "",
+      start_time: ""
+    }
   },
+  os_type: "",
   version: "1.0"
-})
+}
+)
 
 const agentConfig = ref({
   name: "",
   role_id: null,
   template_id: null,
   os_type: "",
-  injection_target: "explorer.exe",
-  stealth_level: "medium",
-  custom_config: {}
-
+  injection_target: "",
+  stealth_level: "",
+  custom_config: {},
+  version_info: {}
 })
 
    onMounted(async () => {
@@ -185,11 +177,9 @@ const agentConfig = ref({
   })
 
 
-  //probably activities[0] will be needed to rewrite. Ask Danila abt it
   watch(selectedTemplate, (callback) => {
   if (callback) {
-    agentTemplate.value.template_data.activities[0].apps = [...callback.template_data.activities[0].apps]
-    agentTemplate.value.template_data.activities[0].pages = [...callback.template_data.activities[0].pages]
+    agentTemplate.value.template_data.applications_used.apps = [...callback.template_data.applications_used.apps]
     agentTemplate.value.template_data.schedule.breaks = [...callback.template_data.schedule.breaks]
 
     agentConfig.value.template_id = callback.id
@@ -217,11 +207,11 @@ const agentConfig = ref({
   }
 
   function addBreak() {
-    agentTemplate.value.template_data.schedule.breaks.push({ start: '', duration: '' })
+    agentTemplate.value.template_data.work_schedule.breaks.push({ start: '', duration_minutes: '' })
   }
 
-  function remove(item, container) {
-    container.pop(item);
+  function remove(index, container) {
+     container.splice(index, 1);
   }
 
   function addOS(os) {
@@ -238,7 +228,12 @@ const agentConfig = ref({
   // validation at each step
   async function validate() {
     console.log(step.value)
+    isLoading.value = true
     switch (step.value) {
+
+
+
+
       case 1:
         if (agentConfig.value.role_id == null) {
         console.log('no template selected. Validation...')
@@ -246,52 +241,87 @@ const agentConfig = ref({
           console.log(agentRole.value)
           const response = await axios.post('http://localhost:8000/api/roles', agentRole.value)
           if (response.data.id != null) {
+
             agentTemplate.value.role_id = response.data.id
+            agentTemplate.value.name = response.data.name
             agentConfig.value.role_id = response.data.id
+            agentConfig.value.name = response.data.name
+
+
             console.log("Template ID:", agentConfig.value.role_id)
             console.log('success!')
+
+            isLoading.value = false
             return true
+
           } else {
             console.error('Ошибка в ответе:', response.data)
+
+            isLoading.value = false
             return false
           }
         } catch (error) {
           if (axios.isAxiosError(error)) {
             console.error(error)
           }   
+
+          isLoading.value = false
           return false
           }
         }
         console.log("Template ID:", agentConfig.value.role_id)
+
+        isLoading.value = false
         return true
+
+
+
+
+
       case 2:
         if (agentConfig.value.os_type == null) {
           console.error("ERROR : null OS")
+
+          isLoading.value = false
           return false
+
         }
         console.log('OS:', agentTemplate.value.os_type)
+
+        isLoading.value = false
         return true
+
+
+
+
       case 3:
         if (agentConfig.value.template_id == null) {
         console.log('no template selected. Validation...')
         try {
           console.log(agentTemplate.value)
-          const response = await axios.post('http://localhost:8000/api/behavior-templates', agentRole.value)
-          if (response.data.ok) {
+          const response = await axios.post('http://localhost:8000/api/behavior-templates', agentTemplate.value)
+
             console.log('success!')
+
+            agentConfig.value.template_id = response.data.id
+            isLoading.value = false
             return true
-          } else {
-            console.error('Ошибка в ответе:', response.data)
-            return false
-          }
+
+         
         } catch (error) {
           if (axios.isAxiosError(error)) {
             console.error(error)
           }   
+
+          isLoading.value = false
           return false
+
           }
         }
+
+        isLoading.value = false
         return true
+
     }
   }
   
