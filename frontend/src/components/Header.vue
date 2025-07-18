@@ -1,11 +1,11 @@
 <template>
-  <v-app-bar>
+  <v-app-bar height="64">
     <img :style="{ marginLeft:'1%'}" height="100%" src="/fox.png"/>
     <v-toolbar-title>LISA</v-toolbar-title>
     <v-btn to="/" text="about" />
     <v-btn to="/agents" text="agents" />
     <v-btn to="/addAgentRight" text="add agent" />
-    <v-btn to="/manageTemplates" text="templates" />
+    <v-btn to="/deploy" text="deploy" />
     <v-spacer />
 
    <v-btn @click="toggleTheme">Сменить тему</v-btn>

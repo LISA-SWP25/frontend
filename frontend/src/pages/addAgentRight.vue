@@ -1,8 +1,8 @@
 <template> 
+<v-card title="Create agent" class="MainContainer">
+<v-stepper v-model="step" :items=steps alt-labels hide-actions class="fill-height d-flex flex-column">
 
-<v-stepper v-model="step" :items=steps alt-labels hide-actions>
-
-<v-stepper-actions
+<v-stepper-actions 
       @click:next="stepper()"
       @click:prev="step--"
 ></v-stepper-actions>
@@ -10,27 +10,25 @@
 
 <!-- name & ip -->
 
-  <template v-slot:item.1>
-    <div>
-      create new role or choose existing...
+  <template v-slot:item.1 class="fill-height d-flex flex-column">
+    <v-card title="create new role or choose existing..."  >
+      
       <v-select v-model = "selected" label="preset" :items="roles" item-title="name" :return-object="true"/>
       <v-text-field v-model = "agentRole.name" label="name" required/>
       <v-text-field v-model = "agentRole.description" label="description" required/>
       <v-select v-model = "agentRole.category" label="category" :items="categories"/>
-    </div>
+    </v-card>
   </template>
 
 <!-- OS -->
 
   <template v-slot:item.2>
-    <v-card title="OS" flat>
+    <v-card title="OS">
       <v-container class="d-flex justify-center"> 
-        <v-btn @click="addOS('windows')">
-            <v-img src="/win.png" width="30" height="30" />
+        <v-btn @click="addOS('windows')" class="SelectOS" text="Windows">
         </v-btn>
         <v-spacer/>
-        <v-btn @click="addOS('linux')">
-            <v-img src="/Linux.png" width="30" height="30" cover />
+        <v-btn @click="addOS('linux')" class="SelectOS" text="Linux">
         </v-btn>
       </v-container>  
     </v-card>
@@ -40,7 +38,7 @@
 
   <template v-slot:item.3>
     <v-card title="settings" flat>
-      <v-select v-model = "selectedTemplate" label="preset" :items="templates" item-title="name" :return-object="true"/>
+      <!-- <v-select v-model = "selectedTemplate" label="preset" :items="templates" item-title="name" :return-object="true"/> -->
       <v-row>
 
         <v-col class="overflow-y-auto" style="max-height: 400px;">
@@ -55,8 +53,10 @@
         <v-col class="overflow-y-auto" style="max-height: 400px;">
           <v-card title="Breaks" flat>
             <div class="mb-4 pa-4">
-              <div v-for="(breakItem, index) in agentTemplate.template_data.work_schedule.breaks" :key="index">
-                <v-text-field v-model="breakItem.start" label="Start" hint="HH:MM"/>
+              <div v-for="(breakItem, index) in agentTemplate.template_data.work_schedule.breaks" :key="index">                
+                <v-text-field v-model="breakItem.start" label="Start" hint="HH:MM"
+                append-icon="mdi-close" @click:append="remove(index, agentTemplate.template_data.work_schedule.breaks)"
+                />
                 <v-text-field v-model.number="breakItem.duration_minutes" label="Duration (in minutes)"/>
               </div>
               <v-text-field v-model="agentTemplate.template_data.work_schedule.start_time" label="begin work" hint="HH:MM" />
@@ -64,6 +64,7 @@
             </div>
           </v-card>
           <v-btn @click="addBreak()" icon="mdi-plus" flat/>
+          
         </v-col>
 
       </v-row>
@@ -75,7 +76,7 @@
     <v-label>agent information</v-label>
 
     <v-card flat >
-      сделать АДЕКВАТНЫЙ список с информацией
+      <v-list :items="agentTemplate.template_data.work_schedule.breaks"/>
       <div>
         <v-text-field v-model="agentConfig.injection_target" label="injection target" />
         <v-select v-model="agentConfig.stealth_level" label="stealth level" :items="stealthLevels" />
@@ -88,6 +89,8 @@
   </template>
 
 </v-stepper>
+</v-card>
+
 </template>
 
 
@@ -113,7 +116,7 @@ const selectedTemplate = ref(null)
 const agentRole = ref({
   name: "",
   description: "",
-  category: ""
+  category: "",
 })
 
 
@@ -154,7 +157,8 @@ const agentConfig = ref({
 
    onMounted(async () => {
         const resRole = await fetch("http://localhost:8000/api/roles?skip=0&limit=100")
-        roles.value = await resRole.json();
+        const data = await resRole.json()
+        roles.value = data.filter(role => role.is_active === false)
         console.log(roles.value);
         const resTemplate = await fetch("http://localhost:8000/api/behavior-templates?skip=0&limit=100")
         templates.value = await resTemplate.json();
@@ -303,6 +307,11 @@ const agentConfig = ref({
 
             console.log('success!')
 
+          //agent role becomes active - can't use for now
+          agentRole.value.is_active = true
+          const UpdateRole = await axios.put(`http://localhost:8000/api/roles/${agentTemplate.value.role_id}`, agentRole.value)
+            console.log('role is active')
+
             agentConfig.value.template_id = response.data.id
             isLoading.value = false
             return true
@@ -337,7 +346,7 @@ const agentConfig = ref({
   })
   const resData = await(res.json())
   if (res.ok) {
-    router.push(`/agent/${resData.agent_id}`);
+    router.push(`/deploy`);
   }
 
   } catch (err) {

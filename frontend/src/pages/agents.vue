@@ -1,6 +1,6 @@
 <template>
-    <v-card>   
-        <v-table>
+    <v-card title="Active agents" class="MainContainer">   
+        <v-table v-if="allAgents.length != 0">
             <thead>
                 <tr>
                     <th>
@@ -18,21 +18,45 @@
                 </tr>
             </tbody>
         </v-table>
+            <div v-else class="Text">
+            <h>Your active agents will appear here!</h>
+            <h>If agent deployed recently, give it some time to make respond</h>
+            </div>
     </v-card>
 </template>
 <script setup>
-    const allAgents = ref([]);
-    const router = useRouter();
-    onMounted(async () => {
-        const res = await fetch("http://localhost:8000/api/agents?skip=0&limit=100")
-        allAgents.value = await res.json();
-        console.log(allAgents);
-        
-    });
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 
-    function agentInfo(id) {
-        router.push(`/agent/${id}`);
-        
-    }
+const allAgents = ref([])
+const router = useRouter()
+
+let intervalId = null
+
+async function fetchAgents() {
+  try {
+    const res = await fetch("http://localhost:8000/api/agents/active?threshold_minutes=30")
+    const data = await res.json()
+    allAgents.value = data.agents
+    console.log('Agents updated:', allAgents.value)
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+onMounted(() => {
+  fetchAgents()
+  intervalId = setInterval(fetchAgents, 30_000) 
+})
+
+onUnmounted(() => {
+  clearInterval(intervalId) 
+})
+
+function agentInfo(id) {
+  router.push(`/agent/${id}`)
+}
 </script>
-<style></style>
+<style>
+
+</style>

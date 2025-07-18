@@ -8,3 +8,66 @@
 // @use 'vuetify/settings' with (
 //   $color-pack: false
 // );
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: grid;
+  grid-template-rows: 60px 1fr; // строка под хедер и основное содержимое
+  height: 100vh;
+}
+
+.Text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;      // по горизонтали
+  justify-content: center;  // по вертикали
+  height: 40vh;            // на всю высоту экрана
+  border-radius: 20px;      // скруглённые углы
+  padding: 2rem;
+  background-color: rgb(var(--v-theme-secondary));
+  color: rgb(var(--v-theme-on-secondary));
+
+  // Тень и центрирование
+  margin: 0 auto;
+  max-width: 600px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.MainContainer {
+    height: calc(100vh - 64px);
+}
+
+.Fill {
+    height: 100vh;
+}
+
+.tableRow {
+    background-color: rgb(var(--v-theme-secondary));
+    border-radius: 20px;
+}
+
+.CenterCard {
+    width: 50%;
+    background-color: rgb(var(--v-theme-secondary));
+    padding: 5%;
+    border-radius: 20px;
+}
+
+.CenterContainer {
+    display: flex;
+    justify-content: center;
+    
+}
+
+.CenterButton {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.SelectOS {
+  background-color: rgb(var(--v-theme-secondary));
+}
