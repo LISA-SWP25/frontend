@@ -14,9 +14,7 @@
         </div>
         <div class="CenterContainer">
         <v-card title="deploy" class="CenterCard">
-            <v-text-field v-model="deployTemplate.server_ip" label="Server IP" hint="IP"/>
-            <v-text-field v-model="deployTemplate.server_user" label="User" />
-            <v-text-field v-model="deployTemplate.server_password" label="Password" />
+            <v-select v-model = "selectedServer" label="select target server" item-title="name" :items="servers" :return-object="true"/>
              <div class="CenterButton">
                 <v-btn text="deploy" @click="deploy" />
             </div>
@@ -30,9 +28,12 @@
 import axios from 'axios';
 const route = useRoute();
 const agentInformation = ref({});
+const servers = ref([])
+const selectedServer = ref()
 
 async function deploy() {
     try {
+        console.log(deployTemplate.value)
         const response = await axios.post(`http://localhost:8000/api/agents/${agentInformation.value.agent.agent_id}/deploy`, deployTemplate.value);
         console.log(response.data)
         console.log("sended!")
@@ -49,19 +50,24 @@ const deployTemplate = ref({
     server_password: ""
     });
 
+watch(selectedServer, (callback) => {
+  if (callback) {
+    deployTemplate.value.server_ip = callback.ip
+    deployTemplate.value.server_password = callback.password
+    deployTemplate.value.server_user = callback.login
+  }
+})
+
 onMounted(async () => {
     try {
         const res = await fetch(`http://localhost:8000/api/agents/${route.params.agent_id}/status`);
-        
-        if (!res.ok) {
-            const errorText = await res.text();
-            console.error("Ошибка при получении данных:", errorText);
-            return;
-        }
-
         const data = await res.json();
         agentInformation.value = data;
-        console.log(data); 
+        console.log(agentInformation.value.agent.os_type)
+        const getServers = await axios.get('http://localhost:8000/api/servers');
+        servers.value = getServers.data.filter(server => server.os == agentInformation.value.agent.os_type);
+
+        console.log("Фильтрованные сервера:", servers.value);
     } catch (error) {
         console.error("Ошибка запроса:", error);
     }

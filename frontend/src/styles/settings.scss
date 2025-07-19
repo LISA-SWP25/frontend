@@ -27,7 +27,7 @@ body {
   height: 40vh;            // на всю высоту экрана
   border-radius: 20px;      // скруглённые углы
   padding: 2rem;
-  background-color: rgb(var(--v-theme-secondary));
+  //background-color: rgb(var(--v-theme-secondary));
   color: rgb(var(--v-theme-on-secondary));
 
   // Тень и центрирование
@@ -45,13 +45,14 @@ body {
 }
 
 .tableRow {
-    background-color: rgb(var(--v-theme-secondary));
+  //  background-color: rgb(var(--v-theme-secondary));
     border-radius: 20px;
 }
 
 .CenterCard {
     width: 50%;
-    background-color: rgb(var(--v-theme-secondary));
+    height: 40%;
+    //background-color: rgb(var(--v-theme-secondary));
     padding: 5%;
     border-radius: 20px;
 }
@@ -69,5 +70,14 @@ body {
 }
 
 .SelectOS {
-  background-color: rgb(var(--v-theme-secondary));
+//  background-color: rgb(var(--v-theme-secondary));
+}
+
+.HeaderButton {
+   display: flex;
+  align-items: center;
+
+  > *:not(:last-child) {
+    margin-right: 8px;
+  }
 }
