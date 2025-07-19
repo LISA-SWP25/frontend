@@ -43,9 +43,12 @@
 
         <v-col class="overflow-y-auto" style="max-height: 400px;">
           <v-card title="Apps" flat>
-            <v-text-field v-for="(app, index) in agentTemplate.template_data.applications_used"
-            :key="index" v-model="agentTemplate.template_data.applications_used[index]" label="App" 
-            append-icon="mdi-close" @click:append="remove(index, agentTemplate.template_data.applications_used)"/>
+            <!-- <v-text-field v-for="(app, index) in agentTemplate.template_data.applications_used" -->
+            <!-- :key="index" v-model="agentTemplate.template_data.applications_used[index]" label="App" -->
+            <v-select v-for="(app, index) in agentTemplate.template_data.applications_used"
+            :key="index" v-model="agentTemplate.template_data.applications_used[index]" label="App"
+            :items="apps" append-icon="mdi-close" @click:append="remove(index, agentTemplate.template_data.applications_used)"/>
+            <!-- append-icon="mdi-close" @click:append="remove(index, agentTemplate.template_data.applications_used)"/> -->
           </v-card>
           <v-btn @click="add(agentTemplate.template_data.applications_used)" icon="mdi-plus" flat/>
         </v-col>
@@ -78,7 +81,6 @@
     <v-card flat >
       <v-list :items="agentTemplate.template_data.work_schedule.breaks"/>
       <div>
-        <v-text-field v-model="agentConfig.injection_target" label="injection target" />
         <v-select v-model="agentConfig.stealth_level" label="stealth level" :items="stealthLevels" />
       </div>
     </v-card>
@@ -104,6 +106,7 @@ const router = useRouter();
 const isLoading = ref(false)
 
 const categories = ['developer', 'admin', 'user', 'analyst', 'security']
+const apps = ['Visual Studio Code', 'Firefox', 'Terminal', 'Slack', 'Mousepad', 'chocolate-doom']
 const stealthLevels = ['low', 'medium', 'high']
 const roles = ref([])
 const templates = ref([])
