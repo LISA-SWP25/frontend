@@ -16,7 +16,7 @@
 import axios from 'axios';
 
 const os = ['windows', 'linux']
-
+const router = useRouter()
 const server = ref({  
   name: "",
   description: "",
@@ -30,7 +30,7 @@ async function submit() {
     try {    
         const res = await axios.post("http://localhost:8000/api/servers", server.value)
         console.log("success!")
-        
+        router.push(`/deploy`);
         
     } catch (e) {
         console.error(e)
